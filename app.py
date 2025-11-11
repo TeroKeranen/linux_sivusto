@@ -23,6 +23,7 @@ def home():
 
     # Renderöidään yksinkertainen HTML
     return f"""
+        <h1>Oli kyllä hassunhauska tehtävä ei hkhkkhkhk</h1>
         <h1>SQL server time: {current_time}</h1>
         <h2>SQL server time +1 hour: {plus_one_hour}</h2>
     """
