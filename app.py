@@ -1,32 +1,27 @@
-from flask import Flask
-import mysql.connector
+import streamlit as st
+import pandas as pd
+import plotly.express as px
 
-app = Flask(__name__)
+@st.cache_resource
+def mySql():
+    # Initialize connection using secrets.toml
+    conn = st.connection('mysql', type='sql')
+    # Perform query, returns pandas DataFrame
+    df = conn.query('SELECT TotalKg FROM powerlifting_28_12_24 LIMIT 100;', ttl=600)
+    return df
 
-@app.route('/')
-def home():
-    # Yhdistetään MySQL:ään
-    conn = mysql.connector.connect(
-        host="localhost",
-        user="exampleuser",
-        password="change_this_strong_password",  # sama salasana jolla kirjaudut
-        database="exampledb"
-    )
-    cursor = conn.cursor()
+def main():
+    st.title("Plot data from MySql")
+    st.write("TotalKg from powerlifting")
 
-    # Haetaan SQL-serverin aika ja +1 tunti
-    cursor.execute("SELECT NOW(), DATE_ADD(NOW(), INTERVAL 1 HOUR)")
-    current_time, plus_one_hour = cursor.fetchone()
+    df = mySql()
 
-    cursor.close()
-    conn.close()
+    # NÃ¤ytetÃ¤Ã¤n data taulukkona
+    st.dataframe(df)
 
-    # Renderöidään yksinkertainen HTML
-    return f"""
-        <h1>Oli kyllä hassunhauska tehtävä ei hkhkkhkhk</h1>
-        <h1>SQL server time: {current_time}</h1>
-        <h2>SQL server time +1 hour: {plus_one_hour}</h2>
-    """
+    # PiirretÃ¤Ã¤n kÃ¤yrÃ¤
+    fig = px.line(df, x=df.index, y="TotalKg", title="TotalKg from powerlifting")
+    st.plotly_chart(fig, use_container_width=True)
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+if __name__ == "__main__":
+    main()
